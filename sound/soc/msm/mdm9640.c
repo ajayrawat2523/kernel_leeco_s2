@@ -528,6 +528,7 @@ static int mdm9640_mi2s_set_spk(struct snd_kcontrol *kcontrol,
 				struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_soc_codec *codec = snd_kcontrol_chip(kcontrol);
+
 	pr_debug("%s()\n", __func__);
 
 	if (msm_spk_control == ucontrol->value.integer.value[0])

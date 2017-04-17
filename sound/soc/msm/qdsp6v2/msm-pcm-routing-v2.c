@@ -1705,7 +1705,6 @@ static int msm_routing_ext_ec_put(struct snd_kcontrol *kcontrol,
 	int ret = 1;
 	bool state = true;
 	uint16_t ext_ec_ref_port_id;
-	struct snd_soc_dapm_update *update = NULL;
 
 	mutex_lock(&routing_lock);
 	msm_route_ext_ec_ref = ucontrol->value.integer.value[0];
