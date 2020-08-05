@@ -54,7 +54,7 @@ static int get_cal_path(int path_type);
 #define EC_PORT_ID_QUATERNARY_MI2S_TX 4
 #define EC_PORT_ID_SLIMBUS_1_TX       5
 #ifdef CONFIG_SND_SOC_LEECO
-#define EC_PORT_ID_QUINARY_MI2S_TX       6
+#define EC_PORT_ID_QUINARY_MI2S_TX    6
 #endif
 
 static struct mutex routing_lock;
@@ -65,7 +65,7 @@ static int fm_switch_enable;
 static int fm_pcmrx_switch_enable;
 static int lsm_mux_slim_port;
 static int slim0_rx_aanc_fb_port;
-static int msm_route_ec_ref_rx = 9; /* NONE */
+static int msm_route_ec_ref_rx = 13; /* NONE */
 static uint32_t voc_session_id = ALL_SESSION_VSID;
 static int msm_route_ext_ec_ref = AFE_PORT_INVALID;
 static bool is_custom_stereo_on;
@@ -1627,6 +1627,10 @@ static int msm_routing_ec_ref_rx_put(struct snd_kcontrol *kcontrol,
 		ec_ref_port_id = AFE_PORT_ID_QUINARY_MI2S_TX;
 		break;
 #endif
+	case 12:
+		msm_route_ec_ref_rx = 12;
+		ec_ref_port_id = AFE_PORT_ID_QUATERNARY_MI2S_RX;
+		break;
 	default:
 		msm_route_ec_ref_rx = 0; /* NONE */
 		pr_err("%s EC ref rx %ld not valid\n",
@@ -1646,15 +1650,11 @@ static const char *const ec_ref_rx[] = { "None", "SLIM_RX", "I2S_RX",
 	"PRI_MI2S_TX", "SEC_MI2S_TX",
 	"TERT_MI2S_TX", "QUAT_MI2S_TX", "SEC_I2S_RX", "PROXY_RX",
 #ifdef CONFIG_SND_SOC_LEECO
-	"SLIM_5_RX", "SLIM_1_TX", "QUIN_MI2S_TX"};
-#else
-	"SLIM_5_RX", "SLIM_1_TX"};
+	"SLIM_5_RX", "SLIM_1_TX", "QUIN_MI2S_TX", "QUAT_MI2S_RX"};
 #endif
 static const struct soc_enum msm_route_ec_ref_rx_enum[] = {
 #ifdef CONFIG_SND_SOC_LEECO
-	SOC_ENUM_SINGLE_EXT(12, ec_ref_rx),
-#else
-	SOC_ENUM_SINGLE_EXT(11, ec_ref_rx),
+	SOC_ENUM_SINGLE_EXT(13, ec_ref_rx),
 #endif
 };
 
@@ -1768,16 +1768,13 @@ static int msm_routing_ext_ec_put(struct snd_kcontrol *kcontrol,
 static const char * const ext_ec_ref_rx[] = {"NONE", "PRI_MI2S_TX",
 					     "SEC_MI2S_TX", "TERT_MI2S_TX",
 #ifdef CONFIG_SND_SOC_LEECO
-					     "QUAT_MI2S_TX", "SLIM_1_TX", "QUIN_MI2S_TX"};
-#else
-					     "QUAT_MI2S_TX", "SLIM_1_TX"};
+					     "QUAT_MI2S_TX", "SLIM_1_TX",
+					     "QUIN_MI2S_TX"};
 #endif
 
 static const struct soc_enum msm_route_ext_ec_ref_rx_enum[] = {
 #ifdef CONFIG_SND_SOC_LEECO
 	SOC_ENUM_SINGLE_EXT(7, ext_ec_ref_rx),
-#else
-	SOC_ENUM_SINGLE_EXT(6, ext_ec_ref_rx),
 #endif
 };
 
@@ -2894,6 +2891,12 @@ static const struct snd_kcontrol_new mmul5_mixer_controls[] = {
 	SOC_SINGLE_EXT("TERT_MI2S_TX", MSM_BACKEND_DAI_TERTIARY_MI2S_TX,
 	MSM_FRONTEND_DAI_MULTIMEDIA5, 1, 0, msm_routing_get_audio_mixer,
 	msm_routing_put_audio_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX", MSM_BACKEND_DAI_QUINARY_MI2S_TX,
+	MSM_FRONTEND_DAI_MULTIMEDIA5, 1, 0, msm_routing_get_audio_mixer,
+	msm_routing_put_audio_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX", MSM_BACKEND_DAI_QUATERNARY_MI2S_TX,
+	MSM_FRONTEND_DAI_MULTIMEDIA5, 1, 0, msm_routing_get_audio_mixer,
+	msm_routing_put_audio_mixer),
 };
 
 static const struct snd_kcontrol_new mmul6_mixer_controls[] = {
@@ -2904,6 +2907,12 @@ static const struct snd_kcontrol_new mmul6_mixer_controls[] = {
 	MSM_FRONTEND_DAI_MULTIMEDIA6, 1, 0, msm_routing_get_audio_mixer,
 	msm_routing_put_audio_mixer),
 	SOC_SINGLE_EXT("TERT_MI2S_TX", MSM_BACKEND_DAI_TERTIARY_MI2S_TX,
+	MSM_FRONTEND_DAI_MULTIMEDIA6, 1, 0, msm_routing_get_audio_mixer,
+	msm_routing_put_audio_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX", MSM_BACKEND_DAI_QUINARY_MI2S_TX,
+	MSM_FRONTEND_DAI_MULTIMEDIA6, 1, 0, msm_routing_get_audio_mixer,
+	msm_routing_put_audio_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX", MSM_BACKEND_DAI_QUATERNARY_MI2S_TX,
 	MSM_FRONTEND_DAI_MULTIMEDIA6, 1, 0, msm_routing_get_audio_mixer,
 	msm_routing_put_audio_mixer),
 	SOC_SINGLE_EXT("PRI_MI2S_TX", MSM_BACKEND_DAI_PRI_MI2S_TX,
@@ -3460,6 +3469,12 @@ static const struct snd_kcontrol_new tx_voice_mixer_controls[] = {
 	SOC_SINGLE_EXT("TERT_MI2S_TX_Voice", MSM_BACKEND_DAI_TERTIARY_MI2S_TX,
 	MSM_FRONTEND_DAI_CS_VOICE, 1, 0, msm_routing_get_voice_mixer,
 	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX_Voice", MSM_BACKEND_DAI_QUINARY_MI2S_TX,
+	MSM_FRONTEND_DAI_CS_VOICE, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX_Voice", MSM_BACKEND_DAI_QUATERNARY_MI2S_TX,
+	MSM_FRONTEND_DAI_CS_VOICE, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
 };
 
 static const struct snd_kcontrol_new tx_voice2_mixer_controls[] = {
@@ -3488,6 +3503,12 @@ static const struct snd_kcontrol_new tx_voice2_mixer_controls[] = {
 	MSM_FRONTEND_DAI_VOICE2, 1, 0, msm_routing_get_voice_mixer,
 	msm_routing_put_voice_mixer),
 	SOC_SINGLE_EXT("TERT_MI2S_TX_Voice2", MSM_BACKEND_DAI_TERTIARY_MI2S_TX,
+	MSM_FRONTEND_DAI_VOICE2, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX_Voice2", MSM_BACKEND_DAI_QUINARY_MI2S_TX,
+	MSM_FRONTEND_DAI_CS_VOICE, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX_Voice2", MSM_BACKEND_DAI_QUATERNARY_MI2S_TX,
 	MSM_FRONTEND_DAI_VOICE2, 1, 0, msm_routing_get_voice_mixer,
 	msm_routing_put_voice_mixer),
 };
@@ -3520,6 +3541,12 @@ static const struct snd_kcontrol_new tx_volte_mixer_controls[] = {
 	SOC_SINGLE_EXT("TERT_MI2S_TX_VoLTE", MSM_BACKEND_DAI_TERTIARY_MI2S_TX,
 	MSM_FRONTEND_DAI_VOLTE, 1, 0, msm_routing_get_voice_mixer,
 	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX_VoLTE", MSM_BACKEND_DAI_QUINARY_MI2S_TX,
+	MSM_FRONTEND_DAI_VOLTE, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX_VoLTE", MSM_BACKEND_DAI_QUATERNARY_MI2S_TX,
+	MSM_FRONTEND_DAI_VOLTE, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
 };
 
 static const struct snd_kcontrol_new tx_vowlan_mixer_controls[] = {
@@ -3548,6 +3575,12 @@ static const struct snd_kcontrol_new tx_vowlan_mixer_controls[] = {
 	MSM_FRONTEND_DAI_VOWLAN, 1, 0, msm_routing_get_voice_mixer,
 	msm_routing_put_voice_mixer),
 	SOC_SINGLE_EXT("TERT_MI2S_TX_VoWLAN", MSM_BACKEND_DAI_TERTIARY_MI2S_TX,
+	MSM_FRONTEND_DAI_VOWLAN, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX_VoWLAN", MSM_BACKEND_DAI_QUINARY_MI2S_TX,
+	MSM_FRONTEND_DAI_VOWLAN, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX_VoWLAN", MSM_BACKEND_DAI_QUATERNARY_MI2S_TX,
 	MSM_FRONTEND_DAI_VOWLAN, 1, 0, msm_routing_get_voice_mixer,
 	msm_routing_put_voice_mixer),
 };
@@ -3580,6 +3613,12 @@ static const struct snd_kcontrol_new tx_voicemmode1_mixer_controls[] = {
 	SOC_SINGLE_EXT("TERT_MI2S_TX_MMode1",
 	MSM_BACKEND_DAI_TERTIARY_MI2S_TX, MSM_FRONTEND_DAI_VOICEMMODE1,
 	1, 0, msm_routing_get_voice_mixer, msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX_MMode1",
+	MSM_BACKEND_DAI_QUINARY_MI2S_TX, MSM_FRONTEND_DAI_VOICEMMODE1,
+	1, 0, msm_routing_get_voice_mixer, msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX_MMode1",
+	MSM_BACKEND_DAI_QUATERNARY_MI2S_TX, MSM_FRONTEND_DAI_VOICEMMODE1,
+	1, 0, msm_routing_get_voice_mixer, msm_routing_put_voice_mixer),
 };
 
 static const struct snd_kcontrol_new tx_voicemmode2_mixer_controls[] = {
@@ -3609,6 +3648,12 @@ static const struct snd_kcontrol_new tx_voicemmode2_mixer_controls[] = {
 	msm_routing_get_voice_mixer, msm_routing_put_voice_mixer),
 	SOC_SINGLE_EXT("TERT_MI2S_TX_MMode2",
 	MSM_BACKEND_DAI_TERTIARY_MI2S_TX, MSM_FRONTEND_DAI_VOICEMMODE2,
+	1, 0, msm_routing_get_voice_mixer, msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX_MMode2",
+	MSM_BACKEND_DAI_QUINARY_MI2S_TX, MSM_FRONTEND_DAI_VOICEMMODE2,
+	1, 0, msm_routing_get_voice_mixer, msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX_MMode2",
+	MSM_BACKEND_DAI_QUATERNARY_MI2S_TX, MSM_FRONTEND_DAI_VOICEMMODE2,
 	1, 0, msm_routing_get_voice_mixer, msm_routing_put_voice_mixer),
 };
 
@@ -3640,6 +3685,12 @@ static const struct snd_kcontrol_new tx_voip_mixer_controls[] = {
 	SOC_SINGLE_EXT("TERT_MI2S_TX_Voip", MSM_BACKEND_DAI_TERTIARY_MI2S_TX,
 	MSM_FRONTEND_DAI_VOIP, 1, 0, msm_routing_get_voice_mixer,
 	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX_Voip", MSM_BACKEND_DAI_QUINARY_MI2S_TX,
+	MSM_FRONTEND_DAI_VOIP, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX_Voip", MSM_BACKEND_DAI_QUATERNARY_MI2S_TX,
+	MSM_FRONTEND_DAI_VOIP, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
 };
 
 static const struct snd_kcontrol_new tx_voice_stub_mixer_controls[] = {
@@ -3662,6 +3713,9 @@ static const struct snd_kcontrol_new tx_voice_stub_mixer_controls[] = {
 	MSM_FRONTEND_DAI_VOICE_STUB, 1, 0, msm_routing_get_voice_stub_mixer,
 	msm_routing_put_voice_stub_mixer),
 	SOC_SINGLE_EXT("QUAT_MI2S_TX", MSM_BACKEND_DAI_QUATERNARY_MI2S_TX,
+	MSM_FRONTEND_DAI_VOICE_STUB, 1, 0, msm_routing_get_voice_stub_mixer,
+	msm_routing_put_voice_stub_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX", MSM_BACKEND_DAI_QUINARY_MI2S_TX,
 	MSM_FRONTEND_DAI_VOICE_STUB, 1, 0, msm_routing_get_voice_stub_mixer,
 	msm_routing_put_voice_stub_mixer),
 	SOC_SINGLE_EXT("AUX_PCM_UL_TX", MSM_BACKEND_DAI_AUXPCM_TX,
@@ -3769,6 +3823,12 @@ static const struct snd_kcontrol_new tx_qchat_mixer_controls[] = {
 	MSM_FRONTEND_DAI_QCHAT, 1, 0, msm_routing_get_voice_mixer,
 	msm_routing_put_voice_mixer),
 	SOC_SINGLE_EXT("TERT_MI2S_TX_QCHAT", MSM_BACKEND_DAI_TERTIARY_MI2S_TX,
+	MSM_FRONTEND_DAI_QCHAT, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX_QCHAT", MSM_BACKEND_DAI_QUINARY_MI2S_TX,
+	MSM_FRONTEND_DAI_QCHAT, 1, 0, msm_routing_get_voice_mixer,
+	msm_routing_put_voice_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX_QCHAT", MSM_BACKEND_DAI_QUATERNARY_MI2S_TX,
 	MSM_FRONTEND_DAI_QCHAT, 1, 0, msm_routing_get_voice_mixer,
 	msm_routing_put_voice_mixer),
 };
@@ -3933,6 +3993,12 @@ static const struct snd_kcontrol_new quat_mi2s_rx_port_mixer_controls[] = {
 	SOC_SINGLE_EXT("TERT_MI2S_TX", MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
 	MSM_BACKEND_DAI_TERTIARY_MI2S_TX, 1, 0, msm_routing_get_port_mixer,
 	msm_routing_put_port_mixer),
+	SOC_SINGLE_EXT("QUIN_MI2S_TX", MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
+	MSM_BACKEND_DAI_QUINARY_MI2S_TX, 1, 0, msm_routing_get_port_mixer,
+	msm_routing_put_port_mixer),
+	SOC_SINGLE_EXT("QUAT_MI2S_TX", MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
+	MSM_BACKEND_DAI_QUATERNARY_MI2S_TX, 1, 0, msm_routing_get_port_mixer,
+	msm_routing_put_port_mixer),
 	SOC_SINGLE_EXT("INTERNAL_FM_TX", MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
 	MSM_BACKEND_DAI_INT_FM_TX, 1, 0, msm_routing_get_port_mixer,
 	msm_routing_put_port_mixer),
@@ -3946,6 +4012,9 @@ static const struct snd_kcontrol_new quin_mi2s_rx_port_mixer_controls[] = {
 	SOC_SINGLE_EXT("TERT_MI2S_TX", MSM_BACKEND_DAI_QUINARY_MI2S_RX,
 	MSM_BACKEND_DAI_TERTIARY_MI2S_TX, 1, 0, msm_routing_get_port_mixer,
 	msm_routing_put_port_mixer),
+        SOC_SINGLE_EXT("QUIN_MI2S_TX", MSM_BACKEND_DAI_QUINARY_MI2S_RX,
+        MSM_BACKEND_DAI_QUINARY_MI2S_TX, 1, 0, msm_routing_get_port_mixer,
+        msm_routing_put_port_mixer),
 	SOC_SINGLE_EXT("INTERNAL_FM_TX", MSM_BACKEND_DAI_QUINARY_MI2S_RX,
 	MSM_BACKEND_DAI_INT_FM_TX, 1, 0, msm_routing_get_port_mixer,
 	msm_routing_put_port_mixer),
@@ -5595,8 +5664,13 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"MultiMedia1 Mixer", "PRI_MI2S_TX", "PRI_MI2S_TX"},
 	{"MultiMedia6 Mixer", "SLIM_0_TX", "SLIMBUS_0_TX"},
 	{"MultiMedia6 Mixer", "TERT_MI2S_TX", "TERT_MI2S_TX"},
+	{"MultiMedia6 Mixer", "QUIN_MI2S_TX", "TERT_MI2S_TX"},
 	{"MultiMedia5 Mixer", "TERT_MI2S_TX", "TERT_MI2S_TX"},
+	{"MultiMedia5 Mixer", "QUAT_MI2S_TX", "QUAT_MI2S_TX"},
+	{"MultiMedia5 Mixer", "QUIN_MI2S_TX", "QUIN_MI2S_TX"},
 	{"MultiMedia6 Mixer", "PRI_MI2S_TX", "PRI_MI2S_TX"},
+	{"MultiMedia6 Mixer", "QUAT_MI2S_TX", "QUAT_MI2S_TX"},
+	{"MultiMedia6 Mixer", "QUIN_MI2S_TX", "QUIN_MI2S_TX"},
 	{"MultiMedia6 Mixer", "AUX_PCM_UL_TX", "AUX_PCM_TX"},
 	{"MultiMedia6 Mixer", "SEC_AUX_PCM_UL_TX", "SEC_AUX_PCM_TX"},
 
@@ -5885,6 +5959,7 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"VOC_EXT_EC MUX", "PRI_MI2S_TX" , "PRI_MI2S_TX"},
 	{"VOC_EXT_EC MUX", "SEC_MI2S_TX" , "SEC_MI2S_TX"},
 	{"VOC_EXT_EC MUX", "TERT_MI2S_TX" , "TERT_MI2S_TX"},
+	{"VOC_EXT_EC MUX", "QUIN_MI2S_TX" , "QUIN_MI2S_TX"},
 	{"VOC_EXT_EC MUX", "QUAT_MI2S_TX" , "QUAT_MI2S_TX"},
 	{"VOC_EXT_EC MUX", "SLIM_1_TX" ,    "SLIMBUS_1_TX"},
 #ifdef CONFIG_SND_SOC_LEECO
@@ -5966,6 +6041,8 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"Voice_Tx Mixer", "PRI_MI2S_TX_Voice", "PRI_MI2S_TX"},
 	{"Voice_Tx Mixer", "MI2S_TX_Voice", "MI2S_TX"},
 	{"Voice_Tx Mixer", "TERT_MI2S_TX_Voice", "TERT_MI2S_TX"},
+	{"Voice_Tx Mixer", "QUIN_MI2S_TX_Voice", "QUIN_MI2S_TX"},
+	{"Voice_Tx Mixer", "QUAT_MI2S_TX_Voice", "QUAT_MI2S_TX"},
 	{"Voice_Tx Mixer", "SLIM_0_TX_Voice", "SLIMBUS_0_TX"},
 	{"Voice_Tx Mixer", "INTERNAL_BT_SCO_TX_Voice", "INT_BT_SCO_TX"},
 	{"Voice_Tx Mixer", "AFE_PCM_TX_Voice", "PCM_TX"},
@@ -5977,6 +6054,8 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"Voice2_Tx Mixer", "PRI_MI2S_TX_Voice2", "PRI_MI2S_TX"},
 	{"Voice2_Tx Mixer", "MI2S_TX_Voice2", "MI2S_TX"},
 	{"Voice2_Tx Mixer", "TERT_MI2S_TX_Voice2", "TERT_MI2S_TX"},
+	{"Voice2_Tx Mixer", "QUIN_MI2S_TX_Voice2", "QUIN_MI2S_TX"},
+	{"Voice2_Tx Mixer", "QUAT_MI2S_TX_Voice2", "QUAT_MI2S_TX"},
 	{"Voice2_Tx Mixer", "SLIM_0_TX_Voice2", "SLIMBUS_0_TX"},
 	{"Voice2_Tx Mixer", "INTERNAL_BT_SCO_TX_Voice2", "INT_BT_SCO_TX"},
 	{"Voice2_Tx Mixer", "AFE_PCM_TX_Voice2", "PCM_TX"},
@@ -5993,6 +6072,8 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"VoLTE_Tx Mixer", "MI2S_TX_VoLTE", "MI2S_TX"},
 	{"VoLTE_Tx Mixer", "PRI_MI2S_TX_VoLTE", "PRI_MI2S_TX"},
 	{"VoLTE_Tx Mixer", "TERT_MI2S_TX_VoLTE", "TERT_MI2S_TX"},
+	{"VoLTE_Tx Mixer", "QUIN_MI2S_TX_VoLTE", "QUIN_MI2S_TX"},
+	{"VoLTE_Tx Mixer", "QUAT_MI2S_TX_VoLTE", "QUAT_MI2S_TX"},
 	{"VoLTE_UL", NULL, "VoLTE_Tx Mixer"},
 
 	{"VoWLAN_Tx Mixer", "PRI_TX_VoWLAN", "PRI_I2S_TX"},
@@ -6004,12 +6085,16 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"VoWLAN_Tx Mixer", "MI2S_TX_VoWLAN", "MI2S_TX"},
 	{"VoWLAN_Tx Mixer", "PRI_MI2S_TX_VoWLAN", "PRI_MI2S_TX"},
 	{"VoWLAN_Tx Mixer", "TERT_MI2S_TX_VoWLAN", "TERT_MI2S_TX"},
+	{"VoWLAN_Tx Mixer", "QUIN_MI2S_TX_VoWLAN", "QUIN_MI2S_TX"},
+	{"VoWLAN_Tx Mixer", "QUAT_MI2S_TX_VoWLAN", "QUAT_MI2S_TX"},
 	{"VoWLAN_UL", NULL, "VoWLAN_Tx Mixer"},
 
 	{"VoiceMMode1_Tx Mixer", "PRI_TX_MMode1", "PRI_I2S_TX"},
 	{"VoiceMMode1_Tx Mixer", "PRI_MI2S_TX_MMode1", "PRI_MI2S_TX"},
 	{"VoiceMMode1_Tx Mixer", "MI2S_TX_MMode1", "MI2S_TX"},
 	{"VoiceMMode1_Tx Mixer", "TERT_MI2S_TX_MMode1", "TERT_MI2S_TX"},
+	{"VoiceMMode1_Tx Mixer", "QUIN_MI2S_TX_MMode1", "QUIN_MI2S_TX"},
+	{"VoiceMMode1_Tx Mixer", "QUAT_MI2S_TX_MMode1", "QUAT_MI2S_TX"},
 	{"VoiceMMode1_Tx Mixer", "SLIM_0_TX_MMode1", "SLIMBUS_0_TX"},
 	{"VoiceMMode1_Tx Mixer", "INT_BT_SCO_TX_MMode1", "INT_BT_SCO_TX"},
 	{"VoiceMMode1_Tx Mixer", "AFE_PCM_TX_MMode1", "PCM_TX"},
@@ -6021,6 +6106,8 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"VoiceMMode2_Tx Mixer", "PRI_MI2S_TX_MMode2", "PRI_MI2S_TX"},
 	{"VoiceMMode2_Tx Mixer", "MI2S_TX_MMode2", "MI2S_TX"},
 	{"VoiceMMode2_Tx Mixer", "TERT_MI2S_TX_MMode2", "TERT_MI2S_TX"},
+	{"VoiceMMode2_Tx Mixer", "QUIN_MI2S_TX_MMode2", "QUIN_MI2S_TX"},
+	{"VoiceMMode2_Tx Mixer", "QUAT_MI2S_TX_MMode2", "QUAT_MI2S_TX"},
 	{"VoiceMMode2_Tx Mixer", "SLIM_0_TX_MMode2", "SLIMBUS_0_TX"},
 	{"VoiceMMode2_Tx Mixer", "INT_BT_SCO_TX_MMode2", "INT_BT_SCO_TX"},
 	{"VoiceMMode2_Tx Mixer", "AFE_PCM_TX_MMode2", "PCM_TX"},
@@ -6037,6 +6124,8 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"Voip_Tx Mixer", "AUX_PCM_TX_Voip", "AUX_PCM_TX"},
 	{"Voip_Tx Mixer", "SEC_AUX_PCM_TX_Voip", "SEC_AUX_PCM_TX"},
 	{"Voip_Tx Mixer", "PRI_MI2S_TX_Voip", "PRI_MI2S_TX"},
+	{"Voip_Tx Mixer", "QUIN_MI2S_TX_Voip", "QUIN_MI2S_TX"},
+	{"Voip_Tx Mixer", "QUAT_MI2S_TX_Voip", "QUAT_MI2S_TX"},
 	{"VOIP_UL", NULL, "Voip_Tx Mixer"},
 
 	{"SLIMBUS_DL_HL", "Switch", "SLIM0_DL_HL"},
@@ -6128,6 +6217,8 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"QCHAT_Tx Mixer", "MI2S_TX_QCHAT", "MI2S_TX"},
 	{"QCHAT_Tx Mixer", "PRI_MI2S_TX_QCHAT", "PRI_MI2S_TX"},
 	{"QCHAT_Tx Mixer", "TERT_MI2S_TX_QCHAT", "TERT_MI2S_TX"},
+	{"QCHAT_Tx Mixer", "QUIN_MI2S_TX_QCHAT", "QUIN_MI2S_TX"},
+	{"QCHAT_Tx Mixer", "QUAT_MI2S_TX_QCHAT", "QUAT_MI2S_TX"},
 	{"QCHAT_UL", NULL, "QCHAT_Tx Mixer"},
 
 	{"INT_FM_RX", NULL, "INTFM_DL_HL"},
@@ -6150,6 +6241,7 @@ static const struct snd_soc_dapm_route intercon[] = {
 #ifdef CONFIG_SND_SOC_LEECO
 	{"QUIN_MI2S_RX_DL_HL", "Switch", "QUIN_MI2S_DL_HL"},
 	{"QUIN_MI2S_RX", NULL, "QUIN_MI2S_RX_DL_HL"},
+	{"QUIN_MI2S_RX", NULL, "QUIN_MI2S_DL_HL"},
 #endif
 	{"MI2S_UL_HL", NULL, "TERT_MI2S_TX"},
 	{"TERT_MI2S_UL_HL", NULL, "TERT_MI2S_TX"},
@@ -6193,6 +6285,7 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"Voice Stub Tx Mixer", "MI2S_TX", "MI2S_TX"},
 	{"Voice Stub Tx Mixer", "PRI_MI2S_TX", "PRI_MI2S_TX"},
 	{"Voice Stub Tx Mixer", "QUAT_MI2S_TX", "QUAT_MI2S_TX"},
+	{"Voice Stub Tx Mixer", "QUIN_MI2S_TX", "QUIN_MI2S_TX"},
 	{"Voice Stub Tx Mixer", "SLIM_0_TX", "SLIMBUS_0_TX"},
 	{"Voice Stub Tx Mixer", "SLIM_3_TX", "SLIMBUS_3_TX"},
 	{"Voice Stub Tx Mixer", "AFE_PCM_TX", "PCM_TX"},
@@ -6273,12 +6366,14 @@ static const struct snd_soc_dapm_route intercon[] = {
 
 	{"QUAT_MI2S_RX Port Mixer", "PRI_MI2S_TX", "PRI_MI2S_TX"},
 	{"QUAT_MI2S_RX Port Mixer", "INTERNAL_FM_TX", "INT_FM_TX"},
+	{"QUAT_MI2S_RX Port Mixer", "QUAT_MI2S_TX", "QUAT_MI2S_TX"},
 	{"QUAT_MI2S_RX", NULL, "QUAT_MI2S_RX Port Mixer"},
 
 #ifdef CONFIG_SND_SOC_LEECO
 	{"QUIN_MI2S_RX Port Mixer", "TERT_MI2S_TX", "TERT_MI2S_TX"},
 	{"QUIN_MI2S_RX Port Mixer", "PRI_MI2S_TX", "PRI_MI2S_TX"},
 	{"QUIN_MI2S_RX Port Mixer", "INTERNAL_FM_TX", "INT_FM_TX"},
+	{"QUIN_MI2S_RX Port Mixer", "QUIN_MI2S_TX", "QUIN_MI2S_TX"},
 	{"QUIN_MI2S_RX", NULL, "QUIN_MI2S_RX Port Mixer"},
 #endif
 
